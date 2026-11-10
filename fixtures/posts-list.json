@@ -1,0 +1,45 @@
+{
+  "items": [
+    {
+      "id": "98432",
+      "postTime": "2026-04-01T14:00:00.000Z",
+      "platform": "twitter",
+      "text": "Scheduled post content",
+      "mediaUrls": [],
+      "account": { "id": "123", "name": "Blotato", "subaccount": null },
+      "state": { "type": "scheduled" }
+    },
+    {
+      "id": "98431",
+      "postTime": "2026-03-30T09:15:00.000Z",
+      "platform": "instagram",
+      "text": "Check out this image!",
+      "mediaUrls": ["https://example.com/image1.jpg"],
+      "account": { "id": "456", "name": "Blotato", "subaccount": null },
+      "state": {
+        "type": "published",
+        "postUrl": "https://instagram.com/p/abc123",
+        "analytics": {
+          "latest": {
+            "fetchedAt": "2026-09-30T12:00:00Z",
+            "metrics": { "viewsCount": "18400", "likesCount": "920" }
+          },
+          "history": []
+        }
+      }
+    },
+    {
+      "id": "98430",
+      "postTime": "2026-03-29T11:00:00.000Z",
+      "platform": "tiktok",
+      "text": "Failed upload",
+      "mediaUrls": ["https://example.com/clip.mp4"],
+      "account": null,
+      "state": {
+        "type": "failed",
+        "errorMessage": "Unsupported media type"
+      }
+    }
+  ],
+  "cursor": "MjAyNi0wMy0yOVQxMTowMDow..."
+}

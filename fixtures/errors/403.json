@@ -1,0 +1,7 @@
+{
+  "code": 403,
+  "reqId": "req_forbidden_example",
+  "message": "Forbidden access",
+  "subscriptionStatus": "inactive",
+  "action": "Check Billing"
+}

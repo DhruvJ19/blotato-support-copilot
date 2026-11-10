@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "blotato-support": {
+      "command": "node",
+      "args": ["src/mcp/index.ts"]
+    }
+  }
+}

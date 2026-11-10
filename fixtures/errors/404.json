@@ -1,0 +1,6 @@
+{
+  "code": 404,
+  "reqId": "req_not_found_example",
+  "message": "Resource not found",
+  "action": "Re-fetch the record and verify the id type"
+}

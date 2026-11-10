@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Read-only Blotato check for a real key.
+# Lists connected accounts and, when BLOTATO_SUBMISSION_ID is set, one status.
+# Never creates, schedules, or deletes a post. Skips cleanly when the key is absent.
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+exec node src/cli/smoke.ts

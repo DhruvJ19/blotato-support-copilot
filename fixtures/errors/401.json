@@ -1,0 +1,6 @@
+{
+  "code": 401,
+  "reqId": "req_unauthorized_example",
+  "message": "Unauthorized access",
+  "action": "Check the blotato-api-key header"
+}

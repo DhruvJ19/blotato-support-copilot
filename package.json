@@ -1,0 +1,28 @@
+{
+  "name": "blotato-support-copilot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Support copilot for Blotato: MCP tools, ticket triage, an n8n review flow, and a daily health check on the public API.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "mcp": "node src/mcp/index.ts",
+    "demo": "node src/cli/demo.ts",
+    "triage": "node src/cli/triage.ts",
+    "draft": "node src/cli/draft.ts",
+    "health": "node src/cli/health.ts",
+    "smoke": "bash scripts/smoke_readonly",
+    "test": "node --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,283 @@
+{
+  "name": "Blotato Support Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Blotato support agent\n\nTicket webhook in, classify as billing / how-to / technical, read the Blotato API, draft a reply, then hold it for a person.\n\nReads only:\n- GET /v2/users/me/accounts\n- GET /v2/posts/:postSubmissionId\n\nThis workflow never publishes, schedules, or removes a post.\n\nSet the n8n environment variable BLOTATO_API_KEY. Leave it empty and the HTTP steps fail soft so the draft still comes back.",
+        "height": 320,
+        "width": 460
+      },
+      "id": "c1a0e6b2-6b1e-4a7a-8f1a-0b0b0b0b0b01",
+      "name": "Read me",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "blotato-support-ticket",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "c1a0e6b2-6b1e-4a7a-8f1a-0b0b0b0b0b02",
+      "name": "Ticket webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        260,
+        420
+      ],
+      "webhookId": "blotato-support-ticket"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Mirrors src/blotato/triage.ts. Keep the two classifiers in step.\nconst raw = $input.first().json;\nconst body = raw.body && typeof raw.body === 'object' ? raw.body : raw;\nconst subject = String(body.subject || '');\nconst message = String(body.message || body.text || '');\nconst blob = subject + '\\n' + message;\nconst explicit = String(body.submissionId || body.postSubmissionId || '').trim();\nconst found = blob.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);\nconst submissionId = explicit || (found ? found[0] : '');\nconst asksHow = /\\b(how do i|how to|where do i|where can i)\\b/i.test(blob);\nconst negated = /\\bnothing failed\\b|\\bdidn't fail\\b|\\bdid not fail\\b/i.test(blob);\nconst hardTechnical = Boolean(submissionId) || /\\b(401|403|422|500|429|timeout|n8n|webhook|error message)\\b/i.test(blob);\nconst publishFailure = !negated && /\\b(post failed|failed to publish|failed post|won't publish|did not publish|publishing failed)\\b/i.test(blob);\nconst billing = /\\b(refund|invoice|charged|billing|subscription|pricing|receipt|payment)\\b/i.test(blob);\nlet category = 'how-to';\nlet reason = 'No billing charge and no publish failure.';\nif (asksHow && !submissionId && !hardTechnical) {\n  category = 'how-to';\n  reason = 'The customer is asking how something works.';\n} else if (billing && !submissionId && !publishFailure && !hardTechnical) {\n  category = 'billing';\n  reason = 'The customer is asking about a charge, plan, or invoice.';\n} else if (hardTechnical || publishFailure) {\n  category = 'technical';\n  reason = submissionId ? 'A submission id is present.' : 'The message describes a failed publish.';\n} else if (billing) {\n  category = 'billing';\n  reason = 'Billing words are present without a publish failure.';\n}\nreturn [{\n  json: {\n    customerName: String(body.customerName || ''),\n    subject,\n    message,\n    category,\n    reason,\n    submissionId\n  }\n}];\n"
+      },
+      "id": "c1a0e6b2-6b1e-4a7a-8f1a-0b0b0b0b0b03",
+      "name": "Classify ticket",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-category",
+              "leftValue": "={{ $json.category }}",
+              "rightValue": "technical",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-submission",
+              "leftValue": "={{ $json.submissionId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c1a0e6b2-6b1e-4a7a-8f1a-0b0b0b0b0b04",
+      "name": "Needs post lookup?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        780,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://backend.blotato.com/v2/posts/{{ $json.submissionId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "={{ $env.BLOTATO_API_KEY }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c1a0e6b2-6b1e-4a7a-8f1a-0b0b0b0b0b05",
+      "name": "Get post status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1060,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://backend.blotato.com/v2/users/me/accounts",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "blotato-api-key",
+              "value": "={{ $env.BLOTATO_API_KEY }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c1a0e6b2-6b1e-4a7a-8f1a-0b0b0b0b0b06",
+      "name": "List connected accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1060,
+        540
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const ticket = $('Classify ticket').first().json;\nconst api = $input.first().json;\nconst name = ticket.customerName ? 'Hi ' + ticket.customerName + ',' : 'Hi,';\nlet detail = 'I have not published or scheduled anything.';\nif (ticket.category === 'billing') {\n  detail = 'I treated this as a billing question. I have not changed the plan and I have not issued a refund. Open Settings > Billing and check the newest charge. A person on billing confirms refunds.';\n} else if (ticket.category === 'how-to') {\n  detail = 'Open Accounts in a private window and log into only the network you want to connect. Facebook needs a Page, not a personal profile. To schedule from the API, put scheduledTime next to post and include a timezone. A request with no time publishes immediately.';\n} else if (api && api.errorMessage && api.status === 'failed') {\n  detail = 'I looked up the submission and the post failed before it went live. The exact error is: ' + api.errorMessage + '. I have not published a replacement. Change the thing that error names before trying again.';\n} else if (api && api.status) {\n  detail = 'I looked up the submission. The status is ' + api.status + '. I have not published a replacement.';\n} else if (api && (api.message || api.error)) {\n  detail = 'The Blotato read did not succeed, so I am not going to guess. I have not published a replacement.';\n} else if (ticket.category === 'technical') {\n  detail = 'This looks like a publish problem. Please send the postSubmissionId from the original create response. The id on a posts-list row is a different id. I have not published a replacement.';\n}\nreturn [{\n  json: {\n    customerName: ticket.customerName,\n    category: ticket.category,\n    reason: ticket.reason,\n    submissionId: ticket.submissionId || null,\n    apiSnapshot: api,\n    draftReply: name + '\\n\\n' + detail\n  }\n}];\n"
+      },
+      "id": "c1a0e6b2-6b1e-4a7a-8f1a-0b0b0b0b0b07",
+      "name": "Draft reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const draft = $input.first().json;\nreturn [{\n  json: {\n    ...draft,\n    review: {\n      status: 'pending_human_review',\n      sendToCustomer: false,\n      note: 'A person approves this reply in the helpdesk before anyone sends it. This workflow never calls POST /v2/posts.'\n    }\n  }\n}];\n"
+      },
+      "id": "c1a0e6b2-6b1e-4a7a-8f1a-0b0b0b0b0b08",
+      "name": "Hold for human review",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        420
+      ]
+    }
+  ],
+  "pinData": {
+    "Ticket webhook": [
+      {
+        "json": {
+          "headers": {},
+          "params": {},
+          "query": {},
+          "body": {
+            "customerName": "Ava",
+            "subject": "TikTok post failed",
+            "message": "My TikTok post failed. submission id 22222222-2222-2222-2222-222222222222. The error says body.post.target must have required property 'isYourBrand'.",
+            "submissionId": "22222222-2222-2222-2222-222222222222"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Ticket webhook": {
+      "main": [
+        [
+          {
+            "node": "Classify ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify ticket": {
+      "main": [
+        [
+          {
+            "node": "Needs post lookup?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs post lookup?": {
+      "main": [
+        [
+          {
+            "node": "Get post status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "List connected accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get post status": {
+      "main": [
+        [
+          {
+            "node": "Draft reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List connected accounts": {
+      "main": [
+        [
+          {
+            "node": "Draft reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft reply": {
+      "main": [
+        [
+          {
+            "node": "Hold for human review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "blotato-support-agent-1",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

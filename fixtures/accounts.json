@@ -1,0 +1,28 @@
+{
+  "items": [
+    {
+      "id": "12345",
+      "platform": "twitter",
+      "fullname": "John Doe",
+      "username": "@johndoe"
+    },
+    {
+      "id": "456",
+      "platform": "instagram",
+      "fullname": "Blotato",
+      "username": "blotato"
+    },
+    {
+      "id": "67890",
+      "platform": "facebook",
+      "fullname": "Blotato Page Admin",
+      "username": "blotato"
+    },
+    {
+      "id": "tiktok_1",
+      "platform": "tiktok",
+      "fullname": "Blotato TikTok",
+      "username": "@blotato"
+    }
+  ]
+}

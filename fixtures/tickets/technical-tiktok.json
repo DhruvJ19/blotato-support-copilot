@@ -1,0 +1,5 @@
+{
+  "customerName": "Ava",
+  "subject": "TikTok post failed",
+  "message": "My TikTok post failed. submission id 22222222-2222-2222-2222-222222222222. The error says body.post.target must have required property 'isYourBrand' or 'isBrandedContent'."
+}
