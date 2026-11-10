@@ -109,6 +109,6 @@ A safety test also failed on the first run because the mock server answered `DEL
 
 ## Demo video
 
-Dhruv's walkthrough: _add the link here._
+[Watch Dhruv's 3 minute walkthrough on Loom](https://www.loom.com/share/99428b9ab5a14cb2a03d6bb3806dcb3c)
 
 Record against `npm run demo`, then `bash scripts/smoke_readonly` with a real key. The demo script is the mocked path. The smoke script is the live read. Neither one publishes.
