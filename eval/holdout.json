@@ -1,0 +1,20 @@
+{
+ "_note": "Held-out cases written after the routing fix and run once, to check the fix did not just memorise cases.json.",
+ "triage": [
+  {"id":"h01","subject":"","message":"Why was my card billed $29 when I'm on the free trial?","expect":"billing"},
+  {"id":"h02","subject":"Help","message":"How do I post the same video to TikTok and Reels at once?","expect":"how-to"},
+  {"id":"h03","subject":"","message":"Facebook post failed with error 403, what does that mean?","expect":"technical"},
+  {"id":"h04","subject":"Downgrade","message":"How can I downgrade to the cheaper plan next month?","expect":"billing"},
+  {"id":"h05","subject":"","message":"My X posts didn't go out this morning even though they show as scheduled.","expect":"technical"},
+  {"id":"h06","subject":"API docs","message":"Where do I see the API docs for creating a post?","expect":"how-to"},
+  {"id":"h07","subject":"","message":"The video has been stuck in processing since last night.","expect":"technical"},
+  {"id":"h08","subject":"VAT","message":"Can you add our VAT number to the invoice?","expect":"billing"},
+  {"id":"h09","subject":"","message":"Is there a way to bulk upload 50 posts from a CSV?","expect":"how-to"},
+  {"id":"h10","subject":"LinkedIn","message":"LinkedIn keeps failing for my company page but my personal profile works.","expect":"technical"},
+  {"id":"h11","subject":"","message":"I was double charged and also want to know how to cancel.","expect":"billing"},
+  {"id":"h12","subject":"","message":"How do I change the time zone for my schedule?","expect":"how-to"},
+  {"id":"h13","subject":"","message":"n8n node returns 422 on every request","expect":"technical"},
+  {"id":"h14","subject":"","message":"My Instagram carousel won't publish, only the first image uploads.","expect":"technical"},
+  {"id":"h15","subject":"","message":"Do you offer a discount for nonprofits?","expect":"billing"}
+ ]
+}
