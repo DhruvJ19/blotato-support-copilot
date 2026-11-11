@@ -41,17 +41,17 @@ export function classifyTicket(ticket: TicketInput): {
 
   const asksHow = /\b(how do i|how to|where do i|where can i|can you show me how|what is the way)\b/i.test(blob);
   const hardTechnical = Boolean(submissionId)
-    || /\b(401|403|422|500|429|timeout|n8n|webhook|stack trace|error message|postsubmissionid)\b/i.test(blob);
+    || /\b(401|403|422|500|429|timeout|times out|n8n|webhook|stack trace|error message|postsubmissionid|pages_manage_posts|permission is missing)\b/i.test(blob);
   const negatedFailure = /\bnothing failed\b|\bdidn't fail\b|\bdid not fail\b|\bnot a failed post\b/i.test(blob);
-  const publishFailure = !negatedFailure && /\b(post failed|failed to publish|failed post|won't publish|will not publish|did not publish|publishing failed|status failed)\b/i.test(blob);
-  const billing = /\b(refund|invoice|charged|billing|subscription|pricing|receipt|payment|cancel my plan|double charged)\b/i.test(blob);
+  const publishFailure = !negatedFailure && (
+    /\b(post failed|failed to publish|failed post|won't publish|will not publish|did not publish|publishing failed|status failed|keep failing|keeps failing|posts? (are|is) failing)\b/i.test(blob)
+    || /\b(didn't|did not|never|none of [a-z ]+) (go|went) out\b|\bnot going out\b/i.test(blob)
+    || /\bstuck (on|in) (in-progress|in progress|processing|pending)\b|\bis stuck\b/i.test(blob));
+  const billing = /\b(refund|invoice|charged|billing|billed|subscription|pricing|receipt|payment|cancel my plan|double charged|upgrade|downgrade|annual plan|ai credits|buy more credits)\b/i.test(blob);
 
-  if (asksHow && !submissionId && !hardTechnical) {
-    return { category: "how-to", confidence: "high", reasons: ["The customer is asking how something works."], submissionId };
-  }
-  if (billing && !submissionId && !publishFailure && !hardTechnical) {
-    return { category: "billing", confidence: "high", reasons: ["The customer is asking about a charge, plan, or invoice."], submissionId };
-  }
+  // Order matters. A failed publish or a hard technical signal wins over billing words
+  // ("my post failed, refund me" needs the diagnosis first). "How do I" only decides the
+  // route when nothing else is present, because customers phrase billing and failures as questions too.
   if (hardTechnical || publishFailure) {
     return {
       category: "technical",
@@ -63,7 +63,10 @@ export function classifyTicket(ticket: TicketInput): {
     };
   }
   if (billing) {
-    return { category: "billing", confidence: "medium", reasons: ["Billing words are present without a publish failure."], submissionId };
+    return { category: "billing", confidence: asksHow ? "medium" : "high", reasons: ["The customer is asking about a charge, plan, or invoice."], submissionId };
+  }
+  if (asksHow) {
+    return { category: "how-to", confidence: "high", reasons: ["The customer is asking how something works."], submissionId };
   }
   return {
     category: "how-to",

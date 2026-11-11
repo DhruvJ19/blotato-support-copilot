@@ -15,7 +15,8 @@
     "health": "node src/cli/health.ts",
     "smoke": "bash scripts/smoke_readonly",
     "test": "node --test test/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eval": "node eval/run.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.4.0",
