@@ -118,3 +118,5 @@ Record against `npm run demo`, then `bash scripts/smoke_readonly` with a real ke
 `npm run eval` scores the copilot against hand-labelled cases in `eval/`: 30 ticket-routing cases, 30 error-to-fix cases, and 15 held-out routing cases written after the last routing change and never tuned against. CI fails if routing or error mapping drops below 90%, or if any error is mapped to the wrong fix (a confident wrong fix is worse than handing the case to a person). The latest run is in `eval/report.md`.
 
 First run, before the routing fix: 23 of 30 routing cases were right. "How do I" questions about invoices, upgrades and failed posts were all routed to how-to. After reordering the checks (publish failure first, then billing, then how-to) it is 30 of 30, and the held-out set went from 8 of 15 to 14 of 15. The one held-out miss ("Do you offer a discount for nonprofits?") is left unfixed on purpose.
+
+Honest limits: the cases are hand-written, modelled on Blotato's public error reference and common support asks, not real customer tickets. The error-mapping cases mostly mirror the reference phrases, so 30 of 30 there is expected and is not a generalisation claim.
